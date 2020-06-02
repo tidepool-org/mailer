@@ -14,7 +14,7 @@ const (
 
 type SESMailer struct {
 	cfg    *SESMailerConfig
-	logger *zap.Logger
+	logger *zap.SugaredLogger
 	svc    *ses.SES
 }
 
@@ -22,18 +22,18 @@ type SESMailer struct {
 var _ Mailer = &SESMailer{}
 
 type SESMailerConfig struct {
-	Sender string `env:"TIDEPOOL_EMAIL_SENDER",validate:"email"`
-	Region string `env:"TIDEPOOL_SES_REGION"`
+	Sender string `envconfig:"TIDEPOOL_EMAIL_SENDER",validate:"email"`
+	Region string `envconfig:"TIDEPOOL_SES_REGION",validate:"required"`
 }
 
 type SESMailerParams struct {
 	Cfg *SESMailerConfig
-	Logger *zap.Logger
+	Logger *zap.SugaredLogger
 }
 
 func NewSESMailer(params *SESMailerParams) (*SESMailer, error) {
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-west-2")},
+		Region: aws.String(params.Cfg.Region)},
 	)
 	if err != nil {
 		return nil, err
