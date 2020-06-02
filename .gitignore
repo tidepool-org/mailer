@@ -1,1 +1,5 @@
+# IntelliJ IDEA
 .idea
+
+# Build artifacts
+dist/
