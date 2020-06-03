@@ -1,6 +1,7 @@
 package mailer
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/kelseyhightower/envconfig"
@@ -13,14 +14,14 @@ const (
 )
 
 type Email struct {
-	Recipients []string `validate:"min=1,email"`
-	Cc         []string `validate:"email"`
-	Subject    string   `validate:"required"`
-	Body       string   `validate:"required"`
+	Recipients []string `json:"recipients" validate:"min=1,email"`
+	Cc         []string `json:"cc" validate:"email"`
+	Subject    string   `json:"subject" validate:"required"`
+	Body       string   `json:"body" validate:"required"`
 }
 
 type Mailer interface {
-	Send(email Email) error
+	Send(ctx context.Context, email *Email) error
 }
 
 func New(id string, logger *zap.SugaredLogger, validate *validator.Validate) (Mailer, error) {
@@ -39,6 +40,8 @@ func New(id string, logger *zap.SugaredLogger, validate *validator.Validate) (Ma
 			Logger: logger,
 		}
 		return NewSESMailer(params)
+	case ConsoleMailerBackendID:
+		return NewConsoleMailer(logger), nil
 	default:
 		return nil, errors.New(fmt.Sprintf("unknown mailer backend %s", id))
 	}
