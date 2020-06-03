@@ -1,6 +1,7 @@
 package mailer
 
 import (
+	"context"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -10,6 +11,7 @@ import (
 
 const (
 	SESMailerBackendID = "ses"
+	UnknownErrorCode = "unknown"
 )
 
 type SESMailer struct {
@@ -18,7 +20,7 @@ type SESMailer struct {
 	svc    *ses.SES
 }
 
-// Compiler time interface check
+// Compile time interface check
 var _ Mailer = &SESMailer{}
 
 type SESMailerConfig struct {
@@ -46,29 +48,29 @@ func NewSESMailer(params *SESMailerParams) (*SESMailer, error) {
 	}, nil
 }
 
-func (s *SESMailer) Send(email Email) error {
-	input, err := CreateSendEmailInput(s.cfg.Sender, email)
-	if err != nil {
-		return err
+func (s *SESMailer) Send(ctx context.Context, email *Email) error {
+	if ctx == nil {
+		ctx = context.Background()
 	}
 
-	res, err := s.svc.SendEmail(input)
+	input:= CreateSendEmailInput(s.cfg.Sender, email)
+	res, err := s.svc.SendEmailWithContext(ctx, input)
 	if err != nil {
-		code := "UNKNOWN"
+		code := UnknownErrorCode
 		if awsError, ok := err.(awserr.Error); ok {
 			code = awsError.Code()
 		}
 
 		ObserveError(code, SESMailerBackendID)
-		s.logger.Info("Error while sending email", zap.String("code", code), zap.Error(err))
+		s.logger.Errorw("Error while sending email","code", code, "error", err)
 		return err
 	}
 
-	s.logger.Info("Successfully sent message", zap.String("id", *res.MessageId))
+	s.logger.Infow("Successfully sent message","id", *res.MessageId)
 	return nil
 }
 
-func CreateSendEmailInput(sender string, email Email) (*ses.SendEmailInput, error) {
+func CreateSendEmailInput(sender string, email *Email) *ses.SendEmailInput {
 	return &ses.SendEmailInput{
 		Destination: &ses.Destination{
 			ToAddresses: addresses(email.Recipients),
@@ -87,7 +89,7 @@ func CreateSendEmailInput(sender string, email Email) (*ses.SendEmailInput, erro
 			},
 		},
 		Source: aws.String(sender),
-	}, nil
+	}
 }
 
 func addresses(emails []string) []*string {
