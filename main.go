@@ -72,17 +72,23 @@ func main() {
 	}
 
 	go func() {
-		if err := server.ListenAndServe(); err != nil {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Fatalf("Failed to start server: %s", err)
 		}
 	}()
 	logger.Infof("Server listening on port %v", cfg.ServerPort)
 
 	consumerCtx, consumerCancel := context.WithCancel(context.Background())
+	consumerDone := make(chan bool, 1)
 	go func() {
-		if err := consumer.ProcessMessages(consumerCtx); err != nil {
+		err := consumer.ProcessMessages(consumerCtx)
+		if err != nil {
 			logger.Error(err)
+		} else {
+			logger.Info("Kafka email consumer was successfully shutdown")
 		}
+
+		consumerDone <- err != nil
 	}()
 
 	done := make(chan os.Signal, 1)
@@ -97,6 +103,7 @@ func main() {
 	}()
 
 	consumerCancel()
+	<-consumerDone
 	if err := server.Shutdown(ctx); err != nil {
 		logger.Fatalf("Server shutdown failed %s", err)
 	}

@@ -49,10 +49,10 @@ func (e *EmailConsumer) ProcessMessages(ctx context.Context) error {
 	run := true
 	for run == true {
 		select {
-		case err := <-ctx.Done():
+		case <-ctx.Done():
 			e.logger.Debugw(
 				"Email consumer context was terminated. Shutting down consumer.",
-				"reason", err,
+				"reason", ctx.Err(),
 			)
 			run = false
 		default:
