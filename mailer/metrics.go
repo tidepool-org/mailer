@@ -11,7 +11,7 @@ func createErrorCounter() *prometheus.CounterVec {
 		prometheus.CounterOpts{
 			Namespace: "tidepool",
 			Subsystem: "mailer",
-			Name: "errors",
+			Name: "backend_errors",
 		},
 		[]string{"code", "backend"},
 	)

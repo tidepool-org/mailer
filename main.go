@@ -7,6 +7,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tidepool-org/mailer/api"
+	"github.com/tidepool-org/mailer/kafka"
 	"github.com/tidepool-org/mailer/mailer"
 	"go.uber.org/zap"
 	"log"
@@ -18,7 +19,7 @@ import (
 )
 
 type Config struct {
-	Backend     string `envconfig:"TIDEPOOL_MAILER_BACKEND" default:"ses" validate:"oneof=ses"`
+	Backend     string `envconfig:"TIDEPOOL_MAILER_BACKEND" default:"console" validate:"oneof=ses console"`
 	LoggerLevel string `envconfig:"TIDEPOOL_LOGGER_LEVEL" default:"debug" validate:"oneof=error warn info debug"`
 	ServerPort  uint16  `envconfig:"TIDEPOOL_SERVICE_PORT" default:"9128" validate:"required"`
 }
@@ -45,9 +46,19 @@ func main() {
 	defer l.Sync()
 	logger := l.Sugar()
 
-	_, err = mailer.New(cfg.Backend, logger, validate)
+	mlr, err := mailer.New(cfg.Backend, logger, validate)
 	if err != nil {
 		logger.Fatal(err.Error())
+	}
+
+	kafkaConsumerConfig := &kafka.ConsumerConfig{}
+	envconfig.MustProcess("", kafkaConsumerConfig)
+	if err = validate.Struct(kafkaConsumerConfig); err != nil {
+		logger.Fatal(err)
+	}
+	consumer, err := kafka.NewEmailConsumer(kafkaConsumerConfig, logger, mlr)
+	if err != nil {
+		logger.Fatal(err)
 	}
 
 	mux := http.NewServeMux()
@@ -60,15 +71,22 @@ func main() {
 		Handler: mux,
 	}
 
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
 	go func() {
 		if err := server.ListenAndServe(); err != nil {
 			logger.Fatalf("Failed to start server: %s", err)
 		}
 	}()
 	logger.Infof("Server listening on port %v", cfg.ServerPort)
+
+	consumerCtx, consumerCancel := context.WithCancel(context.Background())
+	go func() {
+		if err := consumer.ProcessMessages(consumerCtx); err != nil {
+			logger.Error(err)
+		}
+	}()
+
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	<-done
 	logger.Info("Received signal to shutdown server")
@@ -77,9 +95,11 @@ func main() {
 	defer func() {
 		cancel()
 	}()
+
+	consumerCancel()
 	if err := server.Shutdown(ctx); err != nil {
 		logger.Fatalf("Server shutdown failed %s", err)
 	}
 
-	logger.Info("Server was succeesfully shutdown")
+	logger.Info("Server was successfully shutdown")
 }
