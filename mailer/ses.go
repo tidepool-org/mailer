@@ -24,8 +24,8 @@ type SESMailer struct {
 var _ Mailer = &SESMailer{}
 
 type SESMailerConfig struct {
-	Sender string `envconfig:"TIDEPOOL_EMAIL_SENDER",validate:"email"`
-	Region string `envconfig:"TIDEPOOL_SES_REGION",validate:"required"`
+	Sender string `envconfig:"TIDEPOOL_EMAIL_SENDER" default:"noreply@tidepool.org" validate:"email"`
+	Region string `envconfig:"TIDEPOOL_SES_REGION" default:"us-west-2" validate:"required"`
 }
 
 type SESMailerParams struct {
