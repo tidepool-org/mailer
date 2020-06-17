@@ -8,6 +8,7 @@ import (
 	"github.com/tidepool-org/mailer/mailer"
 	"go.uber.org/zap"
 	"sync"
+	"time"
 
 	pb "github.com/tidepool-org/workscheduler/workscheduler"
 	"google.golang.org/grpc"
@@ -15,20 +16,23 @@ import (
 
 type Worker struct {
 	client               pb.WorkSchedulerClient
+	connectTimeout       time.Duration
 	logger               *zap.SugaredLogger
 	mailerr              mailer.Mailer
 	workschedulerAddress string
 }
 
 type Params struct {
-	Logger               *zap.SugaredLogger
-	Mailerr              mailer.Mailer
-	WorkschedulerAddress string
+	WorkschedulerConnectTimeout time.Duration
+	Logger                      *zap.SugaredLogger
+	Mailerr                     mailer.Mailer
+	WorkschedulerAddress        string
 }
 
 func New(params Params) *Worker {
 	return &Worker{
 		client:               nil,
+		connectTimeout:       params.WorkschedulerConnectTimeout,
 		logger:               params.Logger,
 		mailerr:              params.Mailerr,
 		workschedulerAddress: params.WorkschedulerAddress,
@@ -38,14 +42,15 @@ func New(params Params) *Worker {
 func (w *Worker) Start(ctx context.Context, wg *sync.WaitGroup) error {
 	defer wg.Done()
 
-	conn, err := grpc.Dial(w.workschedulerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	w.logger.Info("Connecting to workscheduler")
+	connectCtx, _ := context.WithTimeout(ctx, w.connectTimeout)
+	conn, err := grpc.DialContext(connectCtx, w.workschedulerAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return errors.Wrap(err, "could not connect to workscheduler")
 	}
 	defer conn.Close()
 
 	w.logger.Info("Successfully connected to workscheduler")
-
 	w.client = pb.NewWorkSchedulerClient(conn)
 	clientCtx, _ := context.WithCancel(ctx)
 

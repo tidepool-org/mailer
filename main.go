@@ -20,10 +20,11 @@ import (
 )
 
 type Config struct {
-	Backend              string `envconfig:"TIDEPOOL_MAILER_BACKEND" default:"console" validate:"oneof=ses console"`
-	LoggerLevel          string `envconfig:"TIDEPOOL_LOGGER_LEVEL" default:"debug" validate:"oneof=error warn info debug"`
-	ServerPort           uint16 `envconfig:"TIDEPOOL_SERVICE_PORT" default:"8080" validate:"required"`
-	WorkschedulerAddress string `envconfig:"TIDEPOOL_WORKSCHEDULER_ADDRESS" validate:"required"`
+	Backend                     string        `envconfig:"TIDEPOOL_MAILER_BACKEND" default:"console" validate:"oneof=ses console"`
+	LoggerLevel                 string        `envconfig:"TIDEPOOL_LOGGER_LEVEL" default:"debug" validate:"oneof=error warn info debug"`
+	ServerPort                  uint16        `envconfig:"TIDEPOOL_SERVICE_PORT" default:"8080" validate:"required"`
+	WorkschedulerAddress        string        `envconfig:"TIDEPOOL_WORKSCHEDULER_ADDRESS" validate:"required"`
+	WorkschedulerConnectTimeout time.Duration `envconfig:"TIDEPOOL_WORKSCHEDULER_CONNECT_TIMEOUT" default:"30s" validate:"required"`
 }
 
 func main() {
@@ -71,9 +72,10 @@ func main() {
 	logger.Infof("Server listening on port %v", cfg.ServerPort)
 
 	wrkr := worker.New(worker.Params{
-		Logger:               logger,
-		Mailerr:              mlr,
-		WorkschedulerAddress: "localhost:5051",
+		Logger:                      logger,
+		Mailerr:                     mlr,
+		WorkschedulerAddress:        cfg.WorkschedulerAddress,
+		WorkschedulerConnectTimeout: cfg.WorkschedulerConnectTimeout,
 	})
 
 	done := make(chan os.Signal, 1)
