@@ -44,8 +44,12 @@ func (w *Worker) Start(ctx context.Context, wg *sync.WaitGroup) error {
 	}
 	defer conn.Close()
 
+	w.logger.Info("Successfully connected to workscheduler")
+
 	w.client = pb.NewWorkSchedulerClient(conn)
 	clientCtx, _ := context.WithCancel(ctx)
+
+	w.logger.Info("Starting work poll loop")
 
 pollLoop:
 	for {

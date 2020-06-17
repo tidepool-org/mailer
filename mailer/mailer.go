@@ -27,6 +27,7 @@ type Mailer interface {
 func New(id string, logger *zap.SugaredLogger, validate *validator.Validate) (Mailer, error) {
 	switch id {
 	case SESMailerBackendID:
+		logger.Info("Creating new ses mailer backend")
 		backendConfig := &SESMailerConfig{}
 		if err := envconfig.Process("", backendConfig); err != nil {
 			return nil, err
@@ -41,6 +42,7 @@ func New(id string, logger *zap.SugaredLogger, validate *validator.Validate) (Ma
 		}
 		return NewSESMailer(params)
 	case ConsoleMailerBackendID:
+		logger.Info("Creating new console mailer backend")
 		return NewConsoleMailer(logger), nil
 	default:
 		return nil, errors.New(fmt.Sprintf("unknown mailer backend %s", id))
