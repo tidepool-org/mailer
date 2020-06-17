@@ -99,6 +99,7 @@ func (w *Worker) unmarshalOrFail(ctx context.Context, work *pb.Work) (*mailer.Em
 	if err != nil {
 		w.logger.Error("error unmarshaling work to email", "error", err)
 		err = w.fail(ctx, work)
+		return nil, err
 	}
 	return email, err
 }
