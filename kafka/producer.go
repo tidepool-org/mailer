@@ -18,7 +18,7 @@ type EmailProducer struct {
 
 var _ mailer.Mailer = &EmailProducer{}
 
-func NewEmailProducer(cfg *Config, logger *zap.SugaredLogger) (mailer.Mailer, error) {
+func NewEmailProducer(cfg *Config, logger *zap.SugaredLogger) (*EmailProducer, error) {
 	producer, err := kfka.NewProducer(&kfka.ConfigMap{"bootstrap.servers": cfg.KafkaBrokers})
 	if err != nil {
 		return nil, err

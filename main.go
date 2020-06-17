@@ -7,21 +7,23 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tidepool-org/mailer/api"
-	"github.com/tidepool-org/mailer/kafka"
 	"github.com/tidepool-org/mailer/mailer"
+	"github.com/tidepool-org/mailer/worker"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 )
 
 type Config struct {
-	Backend     string `envconfig:"TIDEPOOL_MAILER_BACKEND" default:"console" validate:"oneof=ses console"`
-	LoggerLevel string `envconfig:"TIDEPOOL_LOGGER_LEVEL" default:"debug" validate:"oneof=error warn info debug"`
-	ServerPort  uint16  `envconfig:"TIDEPOOL_SERVICE_PORT" default:"9128" validate:"required"`
+	Backend              string `envconfig:"TIDEPOOL_MAILER_BACKEND" default:"console" validate:"oneof=ses console"`
+	LoggerLevel          string `envconfig:"TIDEPOOL_LOGGER_LEVEL" default:"debug" validate:"oneof=error warn info debug"`
+	ServerPort           uint16 `envconfig:"TIDEPOOL_SERVICE_PORT" default:"8080" validate:"required"`
+	WorkschedulerAddress string `envconfig:"TIDEPOOL_WORKSCHEDULER_ADDRESS" validate:"required"`
 }
 
 func main() {
@@ -51,23 +53,13 @@ func main() {
 		logger.Fatal(err.Error())
 	}
 
-	kafkaConsumerConfig := &kafka.ConsumerConfig{}
-	envconfig.MustProcess("", kafkaConsumerConfig)
-	if err = validate.Struct(kafkaConsumerConfig); err != nil {
-		logger.Fatal(err)
-	}
-	consumer, err := kafka.NewEmailConsumer(kafkaConsumerConfig, logger, mlr)
-	if err != nil {
-		logger.Fatal(err)
-	}
-
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/live", api.LiveHandler)
 	mux.HandleFunc("/ready", api.ReadyHandler)
 
 	server := http.Server{
-		Addr: fmt.Sprintf(":%v", cfg.ServerPort),
+		Addr:    fmt.Sprintf(":%v", cfg.ServerPort),
 		Handler: mux,
 	}
 
@@ -78,33 +70,34 @@ func main() {
 	}()
 	logger.Infof("Server listening on port %v", cfg.ServerPort)
 
-	consumerCtx, consumerCancel := context.WithCancel(context.Background())
-	consumerDone := make(chan bool, 1)
-	go func() {
-		err := consumer.ProcessMessages(consumerCtx)
-		if err != nil {
-			logger.Error(err)
-		} else {
-			logger.Info("Kafka email consumer was successfully shutdown")
-		}
-
-		consumerDone <- err != nil
-	}()
+	wrkr := worker.New(worker.Params{
+		Logger:               logger,
+		Mailerr:              mlr,
+		WorkschedulerAddress: "localhost:5051",
+	})
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
-	<-done
-	logger.Info("Received signal to shutdown server")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer func() {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		<-done
+		logger.Info("Received signal to shutdown server")
 		cancel()
 	}()
 
-	consumerCancel()
-	<-consumerDone
-	if err := server.Shutdown(ctx); err != nil {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func(context.Context, *sync.WaitGroup) {
+		err = wrkr.Start(ctx, wg)
+		if err != nil {
+			logger.Error(err)
+		}
+	}(ctx, wg)
+	wg.Wait()
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer shutdownCancel()
+	if err := server.Shutdown(shutdownCtx); err != nil {
 		logger.Fatalf("Server shutdown failed %s", err)
 	}
 
