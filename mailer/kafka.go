@@ -8,21 +8,20 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
-type Config struct {
-	KafkaBrokers      []string `envconfig:"TIDEPOOL_KAFKA_BROKERS" validate:"required"`
-	KafkaFlushTimeout int      `envconfig:"TIDEPOOL_KAFKA_FLUSH_TIMEOUT" default:"30s" validate:"required"`
-	KafkaTopic        string   `envconfig:"TIDEPOOL_KAFKA_EMAILS_TOPIC" validate:"required"`
+type KafkaMailerConfig struct {
+	KafkaBrokers      []string `envconfig:"TIDEPOOL_KAFKA_BROKERS" required:"true"`
+	KafkaTopic        string   `envconfig:"TIDEPOOL_KAFKA_EMAILS_TOPIC" required:"true"`
 }
 
 type KafkaMailer struct {
-	cfg          *Config
+	cfg          *KafkaMailerConfig
 	deliveryChan chan kafka.Event
 	producer     *kafka.Producer
 }
 
 var _ Mailer = &KafkaMailer{}
 
-func NewKafkaMailer(cfg *Config, deliveryChan chan kafka.Event) (*KafkaMailer, error) {
+func NewKafkaMailer(cfg *KafkaMailerConfig, deliveryChan chan kafka.Event) (*KafkaMailer, error) {
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": cfg.KafkaBrokers})
 	if err != nil {
 		return nil, err
