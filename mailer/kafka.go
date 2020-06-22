@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"strings"
 )
 
 type KafkaMailerConfig struct {
@@ -18,6 +19,10 @@ func (k *KafkaMailerConfig) GetPrefixedTopic() string {
 	return fmt.Sprintf("%s%s", k.KafkaTopicPrefix, k.KafkaTopic)
 }
 
+func (k *KafkaMailerConfig) GetBootstrapServers() string {
+	return strings.Join(k.KafkaBrokers, ",")
+}
+
 type KafkaMailer struct {
 	cfg          *KafkaMailerConfig
 	deliveryChan chan kafka.Event
@@ -27,7 +32,7 @@ type KafkaMailer struct {
 var _ Mailer = &KafkaMailer{}
 
 func NewKafkaMailer(cfg *KafkaMailerConfig, deliveryChan chan kafka.Event) (*KafkaMailer, error) {
-	producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": cfg.KafkaBrokers})
+	producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": cfg.GetBootstrapServers()})
 	if err != nil {
 		return nil, err
 	}
