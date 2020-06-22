@@ -9,8 +9,13 @@ import (
 )
 
 type KafkaMailerConfig struct {
-	KafkaBrokers      []string `envconfig:"TIDEPOOL_KAFKA_BROKERS" required:"true"`
-	KafkaTopic        string   `envconfig:"TIDEPOOL_KAFKA_EMAILS_TOPIC" required:"true"`
+	KafkaBrokers     []string `envconfig:"TIDEPOOL_KAFKA_BROKERS" required:"true"`
+	KafkaTopicPrefix string   `envconfig:"TIDEPOOL_KAFKA_TOPIC_PREFIX" required:"true"`
+	KafkaTopic       string   `envconfig:"TIDEPOOL_KAFKA_EMAILS_TOPIC" required:"true"`
+}
+
+func (k *KafkaMailerConfig) GetPrefixedTopic() string {
+	return fmt.Sprintf("%s%s", k.KafkaTopicPrefix, k.KafkaTopic)
 }
 
 type KafkaMailer struct {
@@ -40,8 +45,9 @@ func (k *KafkaMailer) Send(ctx context.Context, email *Email) error {
 		return err
 	}
 
+	topic := k.cfg.GetPrefixedTopic()
 	err = k.producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &k.cfg.KafkaTopic, Partition: kafka.PartitionAny},
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 		Value:          b,
 	}, k.deliveryChan)
 	return err
