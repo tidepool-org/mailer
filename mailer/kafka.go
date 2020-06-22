@@ -32,7 +32,10 @@ type KafkaMailer struct {
 var _ Mailer = &KafkaMailer{}
 
 func NewKafkaMailer(cfg *KafkaMailerConfig, deliveryChan chan kafka.Event) (*KafkaMailer, error) {
-	producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": cfg.GetBootstrapServers()})
+	producer, err := kafka.NewProducer(&kafka.ConfigMap{
+		"bootstrap.servers": cfg.GetBootstrapServers(),
+		"auto.create.topics.enable": false,
+	})
 	if err != nil {
 		return nil, err
 	}
