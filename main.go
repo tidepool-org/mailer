@@ -4,38 +4,49 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/tidepool-org/go-common/events"
 	"github.com/tidepool-org/mailer/api"
+	"github.com/tidepool-org/mailer/consumer"
 	"github.com/tidepool-org/mailer/mailer"
-	"github.com/tidepool-org/mailer/worker"
+	"github.com/tidepool-org/mailer/templates"
+	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
-	"time"
 )
 
 type Config struct {
-	Backend                     string        `envconfig:"TIDEPOOL_MAILER_BACKEND" default:"console" validate:"oneof=ses console"`
-	LoggerLevel                 string        `envconfig:"TIDEPOOL_LOGGER_LEVEL" default:"debug" validate:"oneof=error warn info debug"`
-	ServerPort                  uint16        `envconfig:"TIDEPOOL_SERVICE_PORT" default:"8080" validate:"required"`
-	WorkschedulerAddress        string        `envconfig:"TIDEPOOL_WORKSCHEDULER_ADDRESS" validate:"required"`
-	WorkschedulerConnectTimeout time.Duration `envconfig:"TIDEPOOL_WORKSCHEDULER_CONNECT_TIMEOUT" default:"30s" validate:"required"`
+	Backend     mailer.Backend `envconfig:"TIDEPOOL_MAILER_BACKEND" default:"console" validate:"oneof=ses console"`
+	LoggerLevel string         `envconfig:"TIDEPOOL_LOGGER_LEVEL" default:"debug" validate:"oneof=error warn info debug"`
+	ServerPort  uint16         `envconfig:"TIDEPOOL_SERVICE_PORT" default:"8080" validate:"required"`
 }
 
-func main() {
-	cfg := &Config{}
-	level := zap.NewAtomicLevel()
-	validate := validator.New()
+func provideValidator() *validator.Validate {
+	return validator.New()
+}
 
+func provideConfig() (*Config, error) {
+	cfg := &Config{}
 	envconfig.MustProcess("", cfg)
+
+	validate := validator.New()
 	if err := validate.Struct(cfg); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
+
+	return cfg, nil
+}
+
+func provideBackend(cfg *Config) mailer.Backend {
+	return cfg.Backend
+}
+
+func provideLogger(cfg *Config, lifecycle fx.Lifecycle) (*zap.SugaredLogger, error) {
+	level := zap.NewAtomicLevel()
+
 	if err := level.UnmarshalText([]byte(cfg.LoggerLevel)); err != nil {
 		log.Fatal(err)
 	}
@@ -44,64 +55,101 @@ func main() {
 	loggerConfig.Level = level
 	l, err := loggerConfig.Build()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	defer l.Sync()
 	logger := l.Sugar()
 
-	mlr, err := mailer.New(cfg.Backend, logger, validate)
-	if err != nil {
-		logger.Fatal(err.Error())
-	}
-
-	mux := http.NewServeMux()
-	mux.Handle("/metrics", promhttp.Handler())
-	mux.HandleFunc("/live", api.LiveHandler)
-	mux.HandleFunc("/ready", api.ReadyHandler)
-
-	server := http.Server{
-		Addr:    fmt.Sprintf(":%v", cfg.ServerPort),
-		Handler: mux,
-	}
-
-	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Fatalf("Failed to start server: %s", err)
-		}
-	}()
-	logger.Infof("Server listening on port %v", cfg.ServerPort)
-
-	wrkr := worker.New(worker.Params{
-		Logger:                      logger,
-		Mailerr:                     mlr,
-		WorkschedulerAddress:        cfg.WorkschedulerAddress,
-		WorkschedulerConnectTimeout: cfg.WorkschedulerConnectTimeout,
+	lifecycle.Append(fx.Hook{
+		OnStart: nil,
+		OnStop: func(ctx context.Context) error {
+			_ = l.Sync()
+			return nil
+		},
 	})
 
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		<-done
-		logger.Info("Received signal to shutdown server")
-		cancel()
-	}()
+	return logger, nil
+}
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func(context.Context, *sync.WaitGroup) {
-		err = wrkr.Start(ctx, wg)
-		if err != nil {
-			logger.Error(err)
-		}
-	}(ctx, wg)
-	wg.Wait()
+type ServerParams struct {
+	fx.In
 
-	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer shutdownCancel()
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		logger.Fatalf("Server shutdown failed %s", err)
+	Cfg                      *Config
+	Logger                   *zap.SugaredLogger
+	Lifecycle                fx.Lifecycle
+	TemplateSourcesHandler   http.Handler `name:"templateSourcesHandler"`
+	RenderedTemplatesHandler http.Handler `name:"renderedTemplatesHandler"`
+}
+
+func providerHttpServer(params ServerParams) (*http.Server, error) {
+	router := mux.NewRouter()
+	router.Handle("/metrics", promhttp.Handler())
+	router.HandleFunc("/live", api.LiveHandler)
+	router.HandleFunc("/ready", api.ReadyHandler)
+	router.Handle("/rendered/{name}", params.RenderedTemplatesHandler)
+	router.PathPrefix("/").Handler(params.TemplateSourcesHandler)
+
+	server := http.Server{
+		Addr:    fmt.Sprintf(":%v", params.Cfg.ServerPort),
+		Handler: router,
 	}
 
-	logger.Info("Server was successfully shutdown")
+	return &server, nil
+}
+
+func start(eventConsumer events.EventConsumer, server *http.Server, logger *zap.SugaredLogger, lifecycle fx.Lifecycle, shutdowner fx.Shutdowner) {
+	lifecycle.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			go func() {
+				if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+					logger.Error("Failed to start server", zap.Error(err))
+					if err := shutdowner.Shutdown(); err != nil {
+						logger.Error("Failed to invoke shutdowner", zap.Error(err))
+					}
+				}
+			}()
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			return server.Shutdown(ctx)
+		},
+	})
+
+	lifecycle.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			if err := eventConsumer.Start(); err != nil && err != events.ErrConsumerStopped {
+				logger.Error("Failed to start consumer", zap.Error(err))
+				if err := shutdowner.Shutdown(); err != nil {
+					logger.Error("Failed to invoke shutdowner", zap.Error(err))
+				}
+			}
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			return eventConsumer.Stop()
+		},
+	})
+}
+
+func main() {
+	fx.New(
+		fx.Provide(
+			provideValidator,
+			provideConfig,
+			provideLogger,
+			provideBackend,
+			templates.Load,
+			mailer.New,
+			consumer.New,
+			fx.Annotated{
+				Name:   "templateSourcesHandler",
+				Target: api.TemplateSourcesHandler,
+			},
+			fx.Annotated{
+				Name:   "renderedTemplatesHandler",
+				Target: api.TemplateSourcesHandler,
+			},
+			providerHttpServer,
+		),
+		fx.Invoke(start),
+	).Run()
 }
