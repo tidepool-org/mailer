@@ -137,6 +137,7 @@ func main() {
 			provideConfig,
 			provideLogger,
 			provideBackend,
+			templates.NewGlobalVariables,
 			templates.Load,
 			mailer.New,
 			consumer.New,

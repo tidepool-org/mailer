@@ -15,7 +15,7 @@ const (
 //go:embed sources/*
 var Sources embed.FS
 
-func Load() (Templates, error) {
+func Load(vars *GlobalVariables) (Templates, error) {
 	templates := make(Templates)
 	entries, err := fs.ReadDir(Sources, "sources")
 	if err != nil {

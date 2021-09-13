@@ -12,18 +12,20 @@ import (
 const timeout = time.Second * 30
 
 type EmailEventHandler struct {
-	logger *zap.SugaredLogger
-	mailer mailer.Mailer
-	tmplts templates.Templates
+	globalVars *templates.GlobalVariables
+	logger     *zap.SugaredLogger
+	mailer     mailer.Mailer
+	tmplts     templates.Templates
 }
 
 var _ events.EmailEventHandler = &EmailEventHandler{}
 
-func NewEmailEventHandler(logger *zap.SugaredLogger, mailer mailer.Mailer, tmplts templates.Templates) (*EmailEventHandler, error) {
+func NewEmailEventHandler(logger *zap.SugaredLogger, mailer mailer.Mailer, tmplts templates.Templates, globalVars *templates.GlobalVariables) (*EmailEventHandler, error) {
 	return &EmailEventHandler{
-		logger: logger,
-		mailer: mailer,
-		tmplts: tmplts,
+		globalVars: globalVars,
+		logger:     logger,
+		mailer:     mailer,
+		tmplts:     tmplts,
 	}, nil
 }
 
@@ -34,7 +36,7 @@ func (e *EmailEventHandler) HandleSendEmailTemplate(payload events.SendEmailTemp
 		return nil
 	}
 
-	vars := payload.Variables
+	vars := MergeGlobalVars(payload.Variables, *e.globalVars)
 	rendered, err := tmplt.Execute(vars)
 	if err != nil {
 		return err
@@ -48,4 +50,13 @@ func (e *EmailEventHandler) HandleSendEmailTemplate(payload events.SendEmailTemp
 
 	ctx, _ := context.WithTimeout(context.Background(), timeout)
 	return e.mailer.Send(ctx, email)
+}
+
+func MergeGlobalVars(vars map[string]string, global templates.GlobalVariables) map[string]string {
+	if vars == nil {
+		vars = make(map[string]string)
+	}
+	vars["AssetURL"] = global.AssetUrl
+	vars["WebURL"] = global.WebAppUrl
+	return vars
 }
