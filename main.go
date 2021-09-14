@@ -80,7 +80,7 @@ type ServerParams struct {
 	RenderedTemplatesHandler http.Handler `name:"renderedTemplatesHandler"`
 }
 
-func providerHttpServer(params ServerParams) (*http.Server, error) {
+func provideHttpServer(params ServerParams) (*http.Server, error) {
 	router := mux.NewRouter()
 	router.Handle("/metrics", promhttp.Handler())
 	router.HandleFunc("/live", api.LiveHandler)
@@ -149,7 +149,7 @@ func main() {
 				Name:   "renderedTemplatesHandler",
 				Target: api.TemplateSourcesHandler,
 			},
-			providerHttpServer,
+			provideHttpServer,
 		),
 		fx.Invoke(start),
 	).Run()

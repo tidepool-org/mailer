@@ -8,18 +8,18 @@ import (
 )
 
 const (
-	topic = "emails"
+	Topic = "emails"
 )
 
-func New(logger *zap.SugaredLogger, mailr mailer.Mailer, tmplts templates.Templates) (events.EventConsumer, error) {
+func New(logger *zap.SugaredLogger, mailr mailer.Mailer, tmplts templates.Templates, globalVars *templates.GlobalVariables) (events.EventConsumer, error) {
 	config := events.NewConfig()
 	if err := config.LoadFromEnv(); err != nil {
 		return nil, err
 	}
 
-	config.KafkaTopic = topic
+	config.KafkaTopic = Topic
 	return events.NewFaultTolerantConsumerGroup(config, func() (events.MessageConsumer, error) {
-		emailEventHandler, err := NewEmailEventHandler(logger, mailr, tmplts)
+		emailEventHandler, err := NewEmailEventHandler(logger, mailr, tmplts, globalVars)
 		if err != nil {
 			return nil, err
 		}
