@@ -13,6 +13,13 @@ const (
 	DefaultCharset = "UTF-8"
 )
 
+type Backend string
+
+func (b *Backend) Decode(value string) error {
+	*b = Backend(value)
+	return nil
+}
+
 type Email struct {
 	Recipients []string `json:"recipients" validate:"min=1,email"`
 	Cc         []string `json:"cc" validate:"email"`
@@ -24,7 +31,7 @@ type Mailer interface {
 	Send(ctx context.Context, email *Email) error
 }
 
-func New(id string, logger *zap.SugaredLogger, validate *validator.Validate) (Mailer, error) {
+func New(id Backend, logger *zap.SugaredLogger, validate *validator.Validate) (Mailer, error) {
 	switch id {
 	case SESMailerBackendID:
 		logger.Info("Creating new ses mailer backend")
