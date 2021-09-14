@@ -76,8 +76,8 @@ type ServerParams struct {
 	Cfg                      *Config
 	Logger                   *zap.SugaredLogger
 	Lifecycle                fx.Lifecycle
-	TemplateSourcesHandler   http.Handler `name:"templateSourcesHandler"`
-	RenderedTemplatesHandler http.Handler `name:"renderedTemplatesHandler"`
+	TemplateSourcesHandler   http.Handler     `name:"templateSourcesHandler"`
+	RenderedTemplatesHandler http.HandlerFunc `name:"renderedTemplatesHandler"`
 }
 
 func provideHttpServer(params ServerParams) (*http.Server, error) {
