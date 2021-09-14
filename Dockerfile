@@ -1,4 +1,4 @@
-FROM unitedwardrobe/golang-librdkafka:alpine3.11-golang1.14.3-librdkafka1.4.2-static AS build
+FROM golang:1.17-alpine AS build
 
 WORKDIR /build
 COPY . .
