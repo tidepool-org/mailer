@@ -116,12 +116,14 @@ func start(eventConsumer events.EventConsumer, server *http.Server, logger *zap.
 
 	lifecycle.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			if err := eventConsumer.Start(); err != nil && err != events.ErrConsumerStopped {
-				logger.Error("Failed to start consumer", zap.Error(err))
-				if err := shutdowner.Shutdown(); err != nil {
-					logger.Error("Failed to invoke shutdowner", zap.Error(err))
+			go func() {
+				if err := eventConsumer.Start(); err != nil && err != events.ErrConsumerStopped {
+					logger.Error("Failed to start consumer", zap.Error(err))
+					if err := shutdowner.Shutdown(); err != nil {
+						logger.Error("Failed to invoke shutdowner", zap.Error(err))
+					}
 				}
-			}
+			}()
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
