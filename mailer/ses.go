@@ -2,6 +2,7 @@ package mailer
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -11,12 +12,13 @@ import (
 
 const (
 	SESMailerBackendID = "ses"
-	UnknownErrorCode = "unknown"
+	UnknownErrorCode   = "unknown"
 )
 
 type SESMailer struct {
 	cfg    *SESMailerConfig
 	logger *zap.SugaredLogger
+	sender string
 	svc    *ses.SES
 }
 
@@ -24,12 +26,13 @@ type SESMailer struct {
 var _ Mailer = &SESMailer{}
 
 type SESMailerConfig struct {
-	Sender string `envconfig:"TIDEPOOL_EMAIL_SENDER" default:"noreply@tidepool.org" validate:"email"`
-	Region string `envconfig:"TIDEPOOL_SES_REGION" default:"us-west-2" validate:"required"`
+	SenderName    string `envconfig:"TIDEPOOL_EMAIL_SENDER_NAME" default:"Tidepool"`
+	SenderAddress string `envconfig:"TIDEPOOL_EMAIL_SENDER_ADDRESS" default:"noreply@tidepool.org" validate:"email"`
+	Region        string `envconfig:"TIDEPOOL_SES_REGION" default:"us-west-2" validate:"required"`
 }
 
 type SESMailerParams struct {
-	Cfg *SESMailerConfig
+	Cfg    *SESMailerConfig
 	Logger *zap.SugaredLogger
 }
 
@@ -42,9 +45,10 @@ func NewSESMailer(params *SESMailerParams) (*SESMailer, error) {
 	}
 
 	return &SESMailer{
-		cfg: params.Cfg,
+		cfg:    params.Cfg,
 		logger: params.Logger.With(zap.String("backend", SESMailerBackendID)),
-		svc: ses.New(sess),
+		sender: FormatSender(params.Cfg.SenderName, params.Cfg.SenderAddress),
+		svc:    ses.New(sess),
 	}, nil
 }
 
@@ -53,7 +57,7 @@ func (s *SESMailer) Send(ctx context.Context, email *Email) error {
 		ctx = context.Background()
 	}
 
-	input:= CreateSendEmailInput(s.cfg.Sender, email)
+	input := CreateSendEmailInput(s.sender, email)
 	res, err := s.svc.SendEmailWithContext(ctx, input)
 	if err != nil {
 		code := UnknownErrorCode
@@ -62,12 +66,19 @@ func (s *SESMailer) Send(ctx context.Context, email *Email) error {
 		}
 
 		ObserveError(code, SESMailerBackendID)
-		s.logger.Errorw("Error while sending email","code", code, "error", err)
+		s.logger.Errorw("Error while sending email", "code", code, "error", err)
 		return err
 	}
 
-	s.logger.Infow("Successfully sent message","id", *res.MessageId)
+	s.logger.Infow("Successfully sent message", "id", *res.MessageId)
 	return nil
+}
+
+func FormatSender(name, address string) string {
+	if name == "" {
+		return address
+	}
+	return fmt.Sprintf("%s <%s>", name, address)
 }
 
 func CreateSendEmailInput(sender string, email *Email) *ses.SendEmailInput {
