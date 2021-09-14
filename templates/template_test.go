@@ -100,14 +100,14 @@ func Test_NewPrecompiledTemplate_ExecuteSuccess(t *testing.T) {
 	expectedSubject := `Username is 'Test User'`
 	expectedBody := `Key is '123.blah.456.blah'`
 	tmpl, _ := templates.NewPrecompiledTemplate(name, subjectSuccessTemplate, bodySuccessTemplate)
-	subject, body, err := tmpl.Execute(content)
+	result, err := tmpl.Execute(content)
 	if err != nil {
 		t.Fatalf(`Error is "%s", but should be nil`, err)
 	}
-	if subject != expectedSubject {
-		t.Fatalf(`Subject is "%s", but should be "%s"`, subject, expectedSubject)
+	if result.Subject != expectedSubject {
+		t.Fatalf(`Subject is "%s", but should be "%s"`, result.Subject, expectedSubject)
 	}
-	if body != expectedBody {
-		t.Fatalf(`Body is "%s", but should be "%s"`, body, expectedBody)
+	if result.Body != expectedBody {
+		t.Fatalf(`Body is "%s", but should be "%s"`, result.Body, expectedBody)
 	}
 }

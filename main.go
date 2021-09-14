@@ -147,7 +147,7 @@ func main() {
 			},
 			fx.Annotated{
 				Name:   "renderedTemplatesHandler",
-				Target: api.TemplateSourcesHandler,
+				Target: api.RenderedTemplatesHandler,
 			},
 			provideHttpServer,
 		),

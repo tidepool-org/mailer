@@ -16,12 +16,7 @@ func TemplateSourcesHandler() (http.Handler, error) {
 	return http.FileServer(http.FS(f)), nil
 }
 
-func RenderedTemplatesHandler(logger *zap.SugaredLogger) (http.HandlerFunc, error) {
-	tmplts, err := templates.Load()
-	if err != nil {
-		return nil, err
-	}
-
+func RenderedTemplatesHandler(logger *zap.SugaredLogger, tmplts templates.Templates) (http.HandlerFunc, error) {
 	return func (w http.ResponseWriter, r *http.Request) {
 		params := mux.Vars(r)
 		template, ok := tmplts[templates.TemplateName(params["name"])]
