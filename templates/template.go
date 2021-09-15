@@ -4,7 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"html/template"
+	htmlTemplate "html/template"
+	textTemplate "text/template"
 	"strconv"
 )
 
@@ -40,8 +41,8 @@ type RenderedTemplate struct {
 
 type PrecompiledTemplate struct {
 	name               TemplateName
-	precompiledSubject *template.Template
-	precompiledBody    *template.Template
+	precompiledSubject *textTemplate.Template
+	precompiledBody    *htmlTemplate.Template
 }
 
 func NewPrecompiledTemplate(name TemplateName, subjectTemplate string, bodyTemplate string) (*PrecompiledTemplate, error) {
@@ -55,12 +56,12 @@ func NewPrecompiledTemplate(name TemplateName, subjectTemplate string, bodyTempl
 		return nil, errors.New("models: body template is missing")
 	}
 
-	precompiledSubject, err := template.New(name.String()).Parse(subjectTemplate)
+	precompiledSubject, err := textTemplate.New(name.String()).Parse(subjectTemplate)
 	if err != nil {
 		return nil, fmt.Errorf("models: failure to precompile subject template: %s", err)
 	}
 
-	precompiledBody, err := template.New(name.String()).Parse(bodyTemplate)
+	precompiledBody, err := htmlTemplate.New(name.String()).Parse(bodyTemplate)
 	if err != nil {
 		return nil, fmt.Errorf("models: failure to precompile body template: %s", err)
 	}
