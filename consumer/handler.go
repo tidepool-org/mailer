@@ -2,6 +2,8 @@ package consumer
 
 import (
 	"context"
+	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/tidepool-org/go-common/events"
 	"github.com/tidepool-org/mailer/mailer"
 	"github.com/tidepool-org/mailer/templates"
@@ -16,6 +18,7 @@ type EmailEventHandler struct {
 	logger     *zap.SugaredLogger
 	mailer     mailer.Mailer
 	tmplts     templates.Templates
+	validate   *validator.Validate
 }
 
 var _ events.EmailEventHandler = &EmailEventHandler{}
@@ -26,13 +29,20 @@ func NewEmailEventHandler(logger *zap.SugaredLogger, mailer mailer.Mailer, tmplt
 		logger:     logger,
 		mailer:     mailer,
 		tmplts:     tmplts,
+		validate:   validator.New(),
 	}, nil
 }
 
 func (e *EmailEventHandler) HandleSendEmailTemplate(payload events.SendEmailTemplateEvent) error {
 	tmplt, ok := e.tmplts[templates.TemplateName(payload.Template)]
 	if !ok {
-		e.logger.Info("Skipping email to %s because template %s doesn't exist", payload.Recipient, payload.Template)
+		e.logger.Infof("Skipping email to %s because template %s doesn't exist", payload.Recipient, payload.Template)
+		return nil
+	}
+
+	if err := e.validate.Var(payload.Recipient, "required,email"); err != nil {
+		err = fmt.Errorf("skipping sending email to %s. Validation failed: %w", payload.Recipient, err)
+		e.logger.Warn(zap.Error(err))
 		return nil
 	}
 

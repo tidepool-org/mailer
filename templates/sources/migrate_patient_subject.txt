@@ -1,1 +1,1 @@
-Information about your Tidepool account
+{{ .ClinicName }} can now access your Tidepool data
