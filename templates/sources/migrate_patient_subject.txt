@@ -1,1 +1,1 @@
-{{ .ClinicName }} can now access your Tidepool data
+Important: Updates to {{ .ClinicName }} access and data sharing
