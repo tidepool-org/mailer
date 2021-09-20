@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	cssRef = "<link rel=\"stylesheet\" type=\"text/css\" href=\"/css/styles.css\" />"
+	cssRef = "<link rel=\"stylesheet\" type=\"text/css\" href=\"./css/styles.css\" />"
 	replacementStartTag = "<style type=\"text/css\">"
 	replacementEndTag = "</style>"
 )
