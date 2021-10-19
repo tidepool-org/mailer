@@ -10,7 +10,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.6.0
-	github.com/tidepool-org/go-common v0.8.3-0.20210910112449-5937a193bc79
+	github.com/tidepool-org/go-common v0.8.3-0.20211014160932-4757171e3914
 	github.com/vanng822/go-premailer v1.20.1
 	go.uber.org/fx v1.14.2
 	go.uber.org/zap v1.16.0
