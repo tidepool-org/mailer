@@ -18,6 +18,7 @@ func Test_Load_ExpectedTemplates(t *testing.T) {
 		"clinic_created": {},
 		"clinic_migration_complete": {},
 		"clinician_permissions_updated": {},
+		"prescription_access_code": {},
 		"share_invitation_received": {},
 	}
 
