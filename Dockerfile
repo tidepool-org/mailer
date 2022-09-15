@@ -3,6 +3,7 @@ FROM golang:1.17-alpine AS build
 WORKDIR /build
 COPY . .
 RUN unset GOPATH && \
+    mkdir dist && \
     go build -tags musl -o ./dist ./...
 
 FROM alpine:latest AS release

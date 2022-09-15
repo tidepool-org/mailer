@@ -6,7 +6,8 @@ go:
   - 1.17
 
 script:
-  - make ci
+  - make test
+  - ./artifact.sh
 
 services:
   - docker
