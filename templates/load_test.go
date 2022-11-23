@@ -1,8 +1,9 @@
 package templates_test
 
 import (
-	"github.com/tidepool-org/mailer/templates"
 	"testing"
+
+	"github.com/tidepool-org/mailer/templates"
 )
 
 func Test_Load_Success(t *testing.T) {
@@ -20,6 +21,7 @@ func Test_Load_ExpectedTemplates(t *testing.T) {
 		"clinician_permissions_updated": {},
 		"share_invitation_received":     {},
 		"patient_upload_reminder":       {},
+		"request_dexcom_connect":        {},
 	}
 
 	tmplts, err := templates.Load()
