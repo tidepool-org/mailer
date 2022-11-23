@@ -36,6 +36,57 @@
                 <p class="h2 content-width">
                   {{ .ClinicianName }} created a Tidepool account for your diabetes device data.
                 </p>
+                <p class="h2 content-width">
+                  Along with your new account, they have requested that you begin sharing your Dexcom data with Tidepool. Please provide authorization to securely share your Dexcom data so that your clinician can view your data in Tidepool by clicking the “Connect with Dexcom” button below.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="inner">
+                <p class="h2 content-width centered">
+                  The data that will be shared includes:
+                  <ul>
+                    <li>Your Estimated Blood Glucose Levels</li>
+                    <li>Your Calibration Data</li>
+                    <li>Your Events Entry Data</li>
+                    <li>Your Device Details</li>
+                    <li>Your CGM Statistics</li>
+                  </ul>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="inner centered">
+                <p class="h2 content-width">
+                  Congratulations, you've successfully created a new Tidepool Clinic Account, {{ .ClinicName }}
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="inner centered">
+                <!--[if (gte mso 9)|(IE)]>
+                <table bgcolor="#627CFF">
+                  <tr>
+                    <td>
+                <![endif]-->
+                <a class="btn primary" href="{{ .DexcomConnectURL }}">
+                  Connect your Dexcom Account
+                </a>
+                <!--[if (gte mso 9)|(IE)]>
+                </td>
+                </tr>
+                </table>
+                <![endif]-->
+              </td>
+            </tr>
+            <tr>
+              <td class="inner centered">
+                <p class="h2 content-width">
+                  Should you ever change your mind, you can revoke data sharing permissions from your Dexcom account. <a href="https://tidepool.org">Learn more here [support link]</a>.
+                </p>
+                <p class="h2 content-width">
+                  If you have any questions about this request, or Tidepool, please contact <a href="mailto:support@tidepool.org">support@tidepool.org</a>.
+                </p>
               </td>
             </tr>
             <tr>

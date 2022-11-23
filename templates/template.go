@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	htmlTemplate "html/template"
-	textTemplate "text/template"
 	"strconv"
+	textTemplate "text/template"
 )
 
 type TemplateName string
@@ -24,6 +24,7 @@ const (
 	TemplateNameSignupClinic          TemplateName = "signup_clinic_confirmation"
 	TemplateNameSignupCustodial       TemplateName = "signup_custodial_confirmation"
 	TemplateNameSignupCustodialClinic TemplateName = "signup_custodial_clinic_confirmation"
+	TemplateNameRequestDexcomConnect  TemplateName = "request_dexcom_connect"
 	TemplateNameUndefined             TemplateName = ""
 )
 
@@ -36,7 +37,7 @@ type Templates map[TemplateName]Template
 
 type RenderedTemplate struct {
 	Subject string
-	Body string
+	Body    string
 }
 
 type PrecompiledTemplate struct {
