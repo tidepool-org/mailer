@@ -15,13 +15,14 @@ func Test_Load_Success(t *testing.T) {
 
 func Test_Load_ExpectedTemplates(t *testing.T) {
 	expectedNames := map[string]struct{}{
-		"migrate_patient":               {},
-		"clinic_created":                {},
-		"clinic_migration_complete":     {},
-		"clinician_permissions_updated": {},
-		"share_invitation_received":     {},
-		"patient_upload_reminder":       {},
-		"request_dexcom_connect":        {},
+		"migrate_patient":                  {},
+		"clinic_created":                   {},
+		"clinic_migration_complete":        {},
+		"clinician_permissions_updated":    {},
+		"share_invitation_received":        {},
+		"patient_upload_reminder":          {},
+		"request_dexcom_connect":           {},
+		"request_dexcom_connect_custodial": {},
 	}
 
 	tmplts, err := templates.Load()
