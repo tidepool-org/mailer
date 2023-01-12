@@ -1,0 +1,1 @@
+{{ .ClinicName }} Follow Up - Reconnect your Dexcom Account to Tidepool

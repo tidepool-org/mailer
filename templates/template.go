@@ -25,6 +25,7 @@ const (
 	TemplateNameSignupCustodial               TemplateName = "signup_custodial_confirmation"
 	TemplateNameSignupCustodialClinic         TemplateName = "signup_custodial_clinic_confirmation"
 	TemplateNameRequestDexcomConnect          TemplateName = "request_dexcom_connect"
+	TemplateNameRequestDexcomReconnect        TemplateName = "request_dexcom_reconnect"
 	TemplateNameRequestDexcomConnectCustodial TemplateName = "request_dexcom_connect_custodial"
 	TemplateNameUndefined                     TemplateName = ""
 )
