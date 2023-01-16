@@ -34,7 +34,13 @@
                   Hi, {{ .PatientName }}!
                 </p>
                 <p class="h2 content-width">
-                  {{ .ClinicName }} has requested that you begin sharing your Dexcom data with Tidepool. Please provide authorization to securely share your Dexcom data so that your clinician can view your data in Tidepool by clicking the "Connect your Dexcom Account" button below.
+                  {{ .ClinicName }} has noticed that your Tidepool connection to Dexcom is no longer active. They have requested that you re-authorize sharing your Dexcom data with Tidepool.
+                </p>
+                <p class="h2 content-width">
+                  If you would no longer like your Dexcom data shared with Tidepool, you can simply ignore this email.
+                </p>
+                <p class="h2 content-width">
+                  If you did not intentionally disconnect, your authorization has likely expired, in which case we ask that you reconnect your Dexcom data to Tidepool by clicking the "Reconnect your Dexcom Account" button below.
                 </p>
               </td>
             </tr>
@@ -60,7 +66,7 @@
                     <td>
                 <![endif]-->
                 <a class="btn primary" href="{{ .WebURL }}/v1/oauth/dexcom/authorize?restricted_token={{ .RestrictedTokenId }}">
-                  Connect your Dexcom Account
+                  Reconnect your Dexcom Account
                 </a>
                 <!--[if (gte mso 9)|(IE)]>
                 </td>

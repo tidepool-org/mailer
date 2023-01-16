@@ -22,6 +22,7 @@ func Test_Load_ExpectedTemplates(t *testing.T) {
 		"share_invitation_received":        {},
 		"patient_upload_reminder":          {},
 		"request_dexcom_connect":           {},
+		"request_dexcom_reconnect":         {},
 		"request_dexcom_connect_custodial": {},
 	}
 
