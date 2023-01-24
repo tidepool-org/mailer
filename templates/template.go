@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	htmlTemplate "html/template"
-	textTemplate "text/template"
 	"strconv"
+	textTemplate "text/template"
 )
 
 type TemplateName string
@@ -16,15 +16,18 @@ func (t TemplateName) String() string {
 }
 
 const (
-	TemplateNameCareteamInvite        TemplateName = "careteam_invitation"
-	TemplateNameClinicianInvite       TemplateName = "clinician_invitation"
-	TemplateNameNoAccount             TemplateName = "no_account"
-	TemplateNamePasswordReset         TemplateName = "password_reset"
-	TemplateNameSignup                TemplateName = "signup_confirmation"
-	TemplateNameSignupClinic          TemplateName = "signup_clinic_confirmation"
-	TemplateNameSignupCustodial       TemplateName = "signup_custodial_confirmation"
-	TemplateNameSignupCustodialClinic TemplateName = "signup_custodial_clinic_confirmation"
-	TemplateNameUndefined             TemplateName = ""
+	TemplateNameCareteamInvite                TemplateName = "careteam_invitation"
+	TemplateNameClinicianInvite               TemplateName = "clinician_invitation"
+	TemplateNameNoAccount                     TemplateName = "no_account"
+	TemplateNamePasswordReset                 TemplateName = "password_reset"
+	TemplateNameSignup                        TemplateName = "signup_confirmation"
+	TemplateNameSignupClinic                  TemplateName = "signup_clinic_confirmation"
+	TemplateNameSignupCustodial               TemplateName = "signup_custodial_confirmation"
+	TemplateNameSignupCustodialClinic         TemplateName = "signup_custodial_clinic_confirmation"
+	TemplateNameRequestDexcomConnect          TemplateName = "request_dexcom_connect"
+	TemplateNameRequestDexcomReconnect        TemplateName = "request_dexcom_reconnect"
+	TemplateNameRequestDexcomConnectCustodial TemplateName = "request_dexcom_connect_custodial"
+	TemplateNameUndefined                     TemplateName = ""
 )
 
 type Template interface {
@@ -36,7 +39,7 @@ type Templates map[TemplateName]Template
 
 type RenderedTemplate struct {
 	Subject string
-	Body string
+	Body    string
 }
 
 type PrecompiledTemplate struct {

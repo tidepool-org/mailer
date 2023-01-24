@@ -31,10 +31,30 @@
             <tr>
               <td class="inner centered">
                 <p class="h1 content-width">
-                  Hey there!
+                  Hi, {{ .PatientName }}!
                 </p>
                 <p class="h2 content-width">
-                  Congratulations, you've successfully created a new Tidepool Clinic Account, {{ .ClinicName }}
+                  {{ .ClinicName }} has noticed that your Tidepool connection to Dexcom is no longer active. They have requested that you re-authorize sharing your Dexcom data with Tidepool.
+                </p>
+                <p class="h2 content-width">
+                  If you would no longer like your Dexcom data shared with Tidepool, you can simply ignore this email.
+                </p>
+                <p class="h2 content-width">
+                  If you did not intentionally disconnect, your authorization has likely expired, in which case we ask that you reconnect your Dexcom data to Tidepool by clicking the "Reconnect your Dexcom Account" button below.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="inner">
+                <p class="h2 content-width centered">
+                  The data that will be shared includes:
+                  <ul>
+                    <li>Your Estimated Blood Glucose Levels</li>
+                    <li>Your Calibration Data</li>
+                    <li>Your Events Entry Data</li>
+                    <li>Your Device Details</li>
+                    <li>Your CGM Statistics</li>
+                  </ul>
                 </p>
               </td>
             </tr>
@@ -45,14 +65,24 @@
                   <tr>
                     <td>
                 <![endif]-->
-                <a class="btn primary" href="{{ .WebURL }}/login">
-                  Access your clinic workspace
+                <a class="btn primary" href="{{ .WebURL }}/v1/oauth/dexcom/authorize?restricted_token={{ .RestrictedTokenId }}">
+                  Reconnect your Dexcom Account
                 </a>
                 <!--[if (gte mso 9)|(IE)]>
                 </td>
                 </tr>
                 </table>
                 <![endif]-->
+              </td>
+            </tr>
+            <tr>
+              <td class="inner centered">
+                <p class="h2 content-width">
+                  Should you ever change your mind, you can revoke data sharing permissions from your Dexcom account. <a href="https://support.tidepool.org/hc/en-us/articles/360029369552-Connecting-your-Dexcom-account-to-Tidepool">Learn more here</a>.
+                </p>
+                <p class="h2 content-width">
+                  If you have any questions about this request, or Tidepool, please contact <a href="mailto:support@tidepool.org">support@tidepool.org</a>.
+                </p>
               </td>
             </tr>
             <tr>
