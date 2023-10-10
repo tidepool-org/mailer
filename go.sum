@@ -178,8 +178,6 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.6.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd0=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/tidepool-org/go-common v0.8.3-0.20210910112449-5937a193bc79 h1:Kw/2VDtvti8NgZpkWTHSbyqBUDf6U4OScRxgRLVW+X4=
-github.com/tidepool-org/go-common v0.8.3-0.20210910112449-5937a193bc79/go.mod h1:0S1OUe8aQH8bKLyeemNKW4WOPkCXxK5FqN9OXu1as7E=
 github.com/tidepool-org/go-common v0.8.3-0.20211014160932-4757171e3914 h1:Dn/HkT1nxsSFbGOvBXSkOiDFqN/gLQJrj+sSspdVnJo=
 github.com/tidepool-org/go-common v0.8.3-0.20211014160932-4757171e3914/go.mod h1:0S1OUe8aQH8bKLyeemNKW4WOPkCXxK5FqN9OXu1as7E=
 github.com/unrolled/render v1.0.3/go.mod h1:gN9T0NhL4Bfbwu8ann7Ry/TGHYfosul+J0obPf6NBdM=
