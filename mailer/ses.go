@@ -57,6 +57,8 @@ func (s *SESMailer) Send(ctx context.Context, email *Email) error {
 		ctx = context.Background()
 	}
 
+	s.logger.Infow("Sending to recipient '%s', from '%s', with CC '%s'", email.Recipients, s.sender, email.Cc)
+
 	input := CreateSendEmailInput(s.sender, email)
 	res, err := s.svc.SendEmailWithContext(ctx, input)
 	if err != nil {
