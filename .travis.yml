@@ -1,5 +1,7 @@
 sudo: false
 
+dist: jammy
+
 language: go
 
 go:
