@@ -3,12 +3,14 @@ package mailer
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"go.uber.org/zap"
-	"strings"
+	"golang.org/x/net/idna"
 )
 
 const (
@@ -60,7 +62,11 @@ func (s *SESMailer) Send(ctx context.Context, email *Email) error {
 
 	s.logger.Infof("Sending to recipient '%s', from '%s', with CC '%s'", strings.Join(email.Recipients, ", "), s.sender, strings.Join(email.Cc, ", "))
 
-	input := CreateSendEmailInput(s.sender, email)
+	input, err := CreateSendEmailInput(s.sender, email)
+	if err != nil {
+		s.logger.Errorw("Error while creating email input", "error", err, "recipients", email.Recipients, "cc", email.Cc)
+		return err
+	}
 	res, err := s.svc.SendEmailWithContext(ctx, input)
 	if err != nil {
 		code := UnknownErrorCode
@@ -84,11 +90,19 @@ func FormatSender(name, address string) string {
 	return fmt.Sprintf("%s <%s>", name, address)
 }
 
-func CreateSendEmailInput(sender string, email *Email) *ses.SendEmailInput {
+func CreateSendEmailInput(sender string, email *Email) (*ses.SendEmailInput, error) {
+	toAddresses, err := addresses(email.Recipients)
+	if err != nil {
+		return nil, err
+	}
+	ccAddresses, err := addresses(email.Cc)
+	if err != nil {
+		return nil, err
+	}
 	return &ses.SendEmailInput{
 		Destination: &ses.Destination{
-			ToAddresses: addresses(email.Recipients),
-			CcAddresses: addresses(email.Cc),
+			ToAddresses: toAddresses,
+			CcAddresses: ccAddresses,
 		},
 		Message: &ses.Message{
 			Body: &ses.Body{
@@ -103,13 +117,17 @@ func CreateSendEmailInput(sender string, email *Email) *ses.SendEmailInput {
 			},
 		},
 		Source: aws.String(sender),
-	}
+	}, nil
 }
 
-func addresses(emails []string) []*string {
-	addr := make([]*string, len(emails))
-	for i, recipient := range emails {
-		addr[i] = aws.String(recipient)
+func addresses(emails []string) ([]*string, error) {
+	addr := make([]*string, 0, len(emails))
+	for _, recipient := range emails {
+		escapedRecipient, err := idna.ToASCII(recipient)
+		if err != nil {
+			return nil, fmt.Errorf("unable to Punycode email: %w", err)
+		}
+		addr = append(addr, aws.String(escapedRecipient))
 	}
-	return addr
+	return addr, nil
 }
