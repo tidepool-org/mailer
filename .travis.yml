@@ -1,5 +1,7 @@
 dist: jammy
 
+dist: jammy
+
 language: go
 
 go:

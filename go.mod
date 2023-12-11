@@ -3,16 +3,17 @@ module github.com/tidepool-org/mailer
 go 1.21
 
 require (
-	github.com/aws/aws-sdk-go v1.46.6
-	github.com/go-playground/validator/v10 v10.15.5
-	github.com/gorilla/mux v1.8.0
+	github.com/aws/aws-sdk-go v1.47.10
+	github.com/go-playground/validator/v10 v10.16.0
+	github.com/gorilla/mux v1.8.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.17.0
-	github.com/tidepool-org/go-common v0.11.1-0.20231027024255-3e797fc79ea1
+	github.com/tidepool-org/go-common v0.11.1-0.20231210182759-3e443cc94b9f
 	github.com/vanng822/go-premailer v1.20.2
 	go.uber.org/fx v1.20.1
 	go.uber.org/zap v1.26.0
+	golang.org/x/net v0.18.0
 )
 
 require (
@@ -60,9 +61,8 @@ require (
 	github.com/xdg/stringprep v1.0.3 // indirect
 	go.uber.org/dig v1.17.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/crypto v0.15.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 )
