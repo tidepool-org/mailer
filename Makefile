@@ -43,3 +43,15 @@ else
 endif
 endif
 endif
+
+.PHONY: generate
+generate:
+
+.PHONY: ci-generate
+ci-generate: generate
+
+.PHONY: ci-build
+ci-build: build
+
+.PHONY: ci-test
+ci-test: test
