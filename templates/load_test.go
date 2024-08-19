@@ -20,9 +20,9 @@ func Test_Load_ExpectedTemplates(t *testing.T) {
 		"clinic_migration_complete":        {},
 		"clinician_permissions_updated":    {},
 		"patient_upload_reminder":          {},    
-    "prescription_access_code":         {},
+		"prescription_access_code":         {},
 		"share_invitation_received":        {},
-    "request_dexcom_connect":           {},
+		"request_dexcom_connect":           {},
 		"request_dexcom_reconnect":         {},
 		"request_dexcom_connect_custodial": {},
 	}
