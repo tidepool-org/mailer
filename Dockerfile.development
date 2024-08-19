@@ -1,0 +1,9 @@
+# Development
+FROM golang:1.22.2-alpine AS development
+WORKDIR /go/src/github.com/tidepool-org/mailer
+RUN adduser -D tidepool && \
+    chown -R tidepool:tidepool /go/src/github.com/tidepool-org/mailer
+USER tidepool
+RUN go install github.com/cosmtrek/air@latest
+COPY --chown=tidepool:tidepool . .
+CMD ["air"]

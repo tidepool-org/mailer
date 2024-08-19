@@ -1,12 +1,11 @@
-sudo: false
+dist: jammy
+
+dist: jammy
 
 language: go
 
 go:
-  - 1.17
-
-script:
-  - make ci
+  - 1.22.2
 
 services:
   - docker
@@ -14,3 +13,7 @@ services:
 cache:
   directories:
     - $HOME/.cache/go-build
+
+script:
+  - make test
+  - ./artifact.sh
