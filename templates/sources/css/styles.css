@@ -36,6 +36,11 @@ div[style*='margin: 16px 0'] {
   padding: 10px;
 }
 
+.normal {
+  font-weight: normal;
+  font-size: 16px;
+}
+
 
 /* One Column Layout */
 
@@ -87,12 +92,15 @@ p.content-width {
   max-width: 400px;
 }
 
-  p.content-width.narrow {
+p.content-width.narrow {
   Margin-left: auto;
   Margin-right: auto;
   max-width: 350px;
 }
 
+p.normal {
+  font-weight: normal;
+}
 
 /* Links */
 
@@ -183,4 +191,13 @@ table.links.primary td.no-left-padding {
     font-size: 10px;
     padding: 0 0 0 4px;
   }
+}
+
+/* Lists */
+
+li {
+  font-weight: normal;
+  font-size: 16px;
+  color: #281946;
+  line-height: 1.5;
 }

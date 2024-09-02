@@ -1,0 +1,1 @@
+{{ .SourceClinicName }} merged with your clinic {{ .TargetClinicName }}
