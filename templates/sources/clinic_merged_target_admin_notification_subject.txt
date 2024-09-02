@@ -1,1 +1,1 @@
-The clinic {{ .SourceClinicName }} was merged with your clinic, {{ .TargetClinicName }}
+{{ .SourceClinicName }} merged with your clinic {{ .TargetClinicName }}

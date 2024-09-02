@@ -1,1 +1,1 @@
-Important: Updates to {{ .SourceClinicName }} access and data sharing
+Update to a clinic you share data with

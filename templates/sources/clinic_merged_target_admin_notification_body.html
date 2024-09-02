@@ -31,7 +31,25 @@
             <tr>
               <td class="inner centered">
                 <p class="h2 content-width">
-                  The clinic {{ .SourceClinicName }} was merged with your clinic, {{ .TargetClinicName }}. This process, authorized by one of your clinic admins, moved the patients and clinic users from {{ .SourceClinicName }} to the {{ .TargetClinicName }}. You should be able to access your patients as before; no action is required now.
+                  Tidepool added the ability for related clinics to merge into one clinic account, which improves their ability to coordinate and provide care across their organization.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="inner">
+                <p class="h2 content-width centered">
+                  Here’s what changed:
+                  <ul>
+                    <li>{{ .SourceClinicName }} has merged with and now become part of {{ .TargetClinicName }}.</li>
+                    <li>This process was authorized by one of your clinic administrators, and moved the patients and clinic users in {{ .SourceClinicName }} over to {{ .TargetClinicName }}.</li>
+                  </ul>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="inner">
+                <p class="normal">
+                  You should be able to access your patients as before, and you don’t need to do anything else. We just wanted to let you know that you might see additional patients in the patient list and additional clinician users at your clinic.
                 </p>
               </td>
             </tr>

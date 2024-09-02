@@ -31,7 +31,30 @@
             <tr>
               <td class="inner centered">
                 <p class="h2 content-width">
-                  A clinic that you share data with, {{ .SourceClinicName }}, has merged with another clinic, {{ .TargetClinicName }}. To ensure your care team maintains access to your data, we have enabled sharing with {{ .TargetClinicName }}. We will continue safeguarding your data and privacy, as detailed in our Terms of Use and Privacy Policy. No action is necessary from you at this time.”
+                  Tidepool added the ability for related clinics to merge into one clinic account, which improves their ability to coordinate and provide care across their organization. We want to let you know how that affects you and how you can control who sees your Tidepool data.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="inner">
+                <p class="h2 content-width centered">
+                  Here's what changed:
+                  <ul>
+                    <li>One of the clinics you share data with, {{ .SourceClinicName }} has merged with and now become part of {{ .TargetClinicName }}.</li>
+                    <li>To ensure your care team maintains access to your data, we have enabled sharing with {{ .TargetClinicName }}.</li>
+                    <li>Going forward, any Tidepool clinician user associated with {{ .TargetClinicName }} will be able to see your Tidepool data.</li>
+                  </ul>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="inner">
+                <p class="h2 content-width centered">
+                  Here's what you can do:
+                  <ul>
+                    <li>If you want to continue sharing data with your care team at {{ .SourceClinicName }}, now called {{ .TargetClinicName }}, you don't have to do anything else. They will continue to be able to see your data.</li>
+                    <li>If you wish to stop sharing with the {{ .TargetClinicName }}, log in to your Tidepool account, click Share, and look for the Clinic account called {{ .TargetClinicName }} and click the three dot menu and click "Remove clinic."</li>
+                  </ul>
                 </p>
               </td>
             </tr>
