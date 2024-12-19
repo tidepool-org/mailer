@@ -1,0 +1,1 @@
+{{ .ClinicName }} Follow Up - Connect your Abbott Account to Tidepool
