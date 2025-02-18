@@ -37,7 +37,18 @@
                   {{ .ClinicName }} has created a Tidepool account for your diabetes device data.
                 </p>
                 <p class="h2 content-width">
-                  Along with your new account, they have requested that you begin sharing your Abbott data with Tidepool. Please provide authorization to securely share your Abbott data so that your clinician can view your data in Tidepool by clicking the "Connect your Abbott Account" button below.
+                  Along with your new account, they have requested that you begin sharing your FreeStyle Libre data with Tidepool. Please provide authorization to securely share your FreeStyle Libre data so that your clinician can view your data in Tidepool by clicking the "Connect Your FreeStyle Libre" button below.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td class="inner">
+                <p class="h2 content-width centered">
+                  The data that will be shared includes:
+                  <ul>
+                    <li>Glucose Data</li>
+                    <li>Device Details </li>
+                  </ul>
                 </p>
               </td>
             </tr>
@@ -49,7 +60,7 @@
                     <td>
                 <![endif]-->
                 <a class="btn primary" href="{{ .WebURL }}/v1/oauth/abbott/authorize?restricted_token={{ .RestrictedTokenId }}">
-                  Connect your Abbott Account
+                  Connect Your FreeStyle Libre
                 </a>
                 <!--[if (gte mso 9)|(IE)]>
                 </td>
@@ -61,7 +72,7 @@
             <tr>
               <td class="inner centered">
                 <p class="h2 content-width">
-                  Should you ever change your mind, you can revoke data sharing permissions from your Abbott account.
+                  Should you ever change your mind, you can revoke data sharing permissions from your LibreView account.
                 </p>
                 <p class="h2 content-width">
                   If you have any questions about this request, or Tidepool, please contact <a href="mailto:support@tidepool.org">support@tidepool.org</a>.
@@ -90,14 +101,6 @@
                     <td valign="middle">
                       <a href="http://www.facebook.com/TidepoolOrg">
                         <img width="14" height="24" src="{{ .AssetURL }}/img/facebook_white_x2.png" alt="Facebook logo" />
-                      </a>
-                    </td>
-                    <td class="no-right-padding" valign="middle">
-                      <p class="attribution">Made possible by</p>
-                    </td>
-                    <td class="no-right-padding" valign="middle">
-                      <a href="http://www.jdrf.org/">
-                        <img width="94" height="24" src="{{ .AssetURL }}/img/jdrf_logo_reverse_x2.png" alt="JDRF logo" />
                       </a>
                     </td>
                   </tr>

@@ -34,13 +34,13 @@
                   Hi, {{ .PatientName }}!
                 </p>
                 <p class="h2 content-width">
-                  {{ .ClinicName }} has noticed that your Tidepool connection to Abbott is no longer active. They have requested that you re-authorize sharing your Abbott data with Tidepool.
+                  {{ .ClinicName }} has noticed that your Tidepool connection to LibreView is no longer active. They have requested that you re-authorize sharing your FreeStyle Libre data with Tidepool.
                 </p>
                 <p class="h2 content-width">
-                  If you would no longer like your Abbott data shared with Tidepool, you can simply ignore this email.
+                  If you would no longer like your FreeStyle Libre data shared with Tidepool, you can simply ignore this email.
                 </p>
                 <p class="h2 content-width">
-                  If you did not intentionally disconnect, your authorization has likely expired, in which case we ask that you reconnect your Abbott data to Tidepool by clicking the "Reconnect your Abbott Account" button below.
+                  If you did not intentionally disconnect, your authorization has likely expired, in which case we ask that you reconnect your FreeStyle Libre data to Tidepool by clicking the "Reconnect Your FreeStyle Libre" button below.
                 </p>
               </td>
             </tr>
@@ -49,11 +49,8 @@
                 <p class="h2 content-width centered">
                   The data that will be shared includes:
                   <ul>
-                    <li>Your Estimated Blood Glucose Levels</li>
-                    <li>Your Calibration Data</li>
-                    <li>Your Events Entry Data</li>
-                    <li>Your Device Details</li>
-                    <li>Your CGM Statistics</li>
+                    <li>Glucose Data</li>
+                    <li>Device Details </li>
                   </ul>
                 </p>
               </td>
@@ -66,7 +63,7 @@
                     <td>
                 <![endif]-->
                 <a class="btn primary" href="{{ .WebURL }}/v1/oauth/abbott/authorize?restricted_token={{ .RestrictedTokenId }}">
-                  Reconnect your Abbott Account
+                  Reconnect Your FreeStyle Libre
                 </a>
                 <!--[if (gte mso 9)|(IE)]>
                 </td>
@@ -78,7 +75,7 @@
             <tr>
               <td class="inner centered">
                 <p class="h2 content-width">
-                  Should you ever change your mind, you can revoke data sharing permissions from your Abbott account.
+                  Should you ever change your mind, you can revoke data sharing permissions from your LibreView Account.
                 </p>
                 <p class="h2 content-width">
                   If you have any questions about this request, or Tidepool, please contact <a href="mailto:support@tidepool.org">support@tidepool.org</a>.
@@ -107,14 +104,6 @@
                     <td valign="middle">
                       <a href="http://www.facebook.com/TidepoolOrg">
                         <img width="14" height="24" src="{{ .AssetURL }}/img/facebook_white_x2.png" alt="Facebook logo" />
-                      </a>
-                    </td>
-                    <td class="no-right-padding" valign="middle">
-                      <p class="attribution">Made possible by</p>
-                    </td>
-                    <td class="no-right-padding" valign="middle">
-                      <a href="http://www.jdrf.org/">
-                        <img width="94" height="24" src="{{ .AssetURL }}/img/jdrf_logo_reverse_x2.png" alt="JDRF logo" />
                       </a>
                     </td>
                   </tr>
