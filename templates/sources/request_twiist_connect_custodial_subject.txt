@@ -1,1 +1,1 @@
-{{ .ClinicName }} Follow Up - Connect your Twiist Account to Tidepool
+{{ .ClinicName }} Follow Up - Connect your twiist Account to Tidepool
