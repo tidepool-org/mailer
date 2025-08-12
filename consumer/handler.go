@@ -57,6 +57,7 @@ func (e *EmailEventHandler) HandleSendEmailTemplate(payload events.SendEmailTemp
 		Subject:    rendered.Subject,
 		Body:       rendered.Body,
 	}
+	for i, attachemnt := range payload.
 
 	ctx, _ := context.WithTimeout(context.Background(), timeout)
 	return e.mailer.Send(ctx, email)
