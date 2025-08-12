@@ -1,8 +1,6 @@
 module github.com/tidepool-org/mailer
 
-go 1.23.0
-
-toolchain go1.24.1
+go 1.24.1
 
 require (
 	github.com/aws/aws-sdk-go v1.55.7
@@ -11,11 +9,12 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.22.0
-	github.com/tidepool-org/go-common v0.12.2
+	github.com/tidepool-org/go-common v0.12.3-0.20250812104912-8c5789d87f55
 	github.com/vanng822/go-premailer v1.25.0
 	go.uber.org/fx v1.24.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.41.0
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
 require (
@@ -66,6 +65,7 @@ require (
 	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/text v0.27.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
 
 // Resolve GO-2024-2611
