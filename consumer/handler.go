@@ -56,7 +56,7 @@ func (e *EmailEventHandler) HandleSendEmailTemplate(payload events.SendEmailTemp
 		Recipients:  []string{payload.Recipient},
 		Subject:     rendered.Subject,
 		Body:        rendered.Body,
-		Attachments: make([]mailer.Attachment, 0, len(payload.Attachments)),
+		Attachments: make([]mailer.Attachment, len(payload.Attachments)),
 	}
 	for i, attachment := range payload.Attachments {
 		email.Attachments[i] = mailer.Attachment{
