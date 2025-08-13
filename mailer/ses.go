@@ -3,6 +3,7 @@ package mailer
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"strings"
@@ -121,8 +122,10 @@ func (s *SESMailer) CreateSendEmailInput(email *Email) (*ses.SendRawEmailInput, 
 	}
 
 	for _, attachment := range email.Attachments {
+
 		msg.Attach(attachment.Filename, gomail.SetCopyFunc(func(writer io.Writer) error {
-			_, err := writer.Write([]byte(attachment.Data))
+			reader := base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(attachment.Data)))
+			_, err := io.Copy(writer, reader)
 			return err
 		}), gomail.SetHeader(map[string][]string{
 			"content-type": {attachment.ContentType},
