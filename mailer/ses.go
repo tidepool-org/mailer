@@ -124,7 +124,7 @@ func (s *SESMailer) CreateSendEmailInput(email *Email) (*ses.SendRawEmailInput, 
 	for _, attachment := range email.Attachments {
 
 		msg.Attach(attachment.Filename, gomail.SetCopyFunc(func(writer io.Writer) error {
-			reader := base64.NewDecoder(base64.StdEncoding, bytes.NewReader([]byte(attachment.Data)))
+			reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(attachment.Data))
 			_, err := io.Copy(writer, reader)
 			return err
 		}), gomail.SetHeader(map[string][]string{
