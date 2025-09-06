@@ -1,8 +1,11 @@
 package mailer
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -11,6 +14,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	"go.uber.org/zap"
 	"golang.org/x/net/idna"
+
+	"gopkg.in/gomail.v2"
 )
 
 const (
@@ -21,7 +26,6 @@ const (
 type SESMailer struct {
 	cfg    *SESMailerConfig
 	logger *zap.SugaredLogger
-	sender string
 	svc    *ses.SES
 }
 
@@ -50,7 +54,6 @@ func NewSESMailer(params *SESMailerParams) (*SESMailer, error) {
 	return &SESMailer{
 		cfg:    params.Cfg,
 		logger: params.Logger.With(zap.String("backend", SESMailerBackendID)),
-		sender: FormatSender(params.Cfg.SenderName, params.Cfg.SenderAddress),
 		svc:    ses.New(sess),
 	}, nil
 }
@@ -60,14 +63,14 @@ func (s *SESMailer) Send(ctx context.Context, email *Email) error {
 		ctx = context.Background()
 	}
 
-	s.logger.Infof("Sending to recipient '%s', from '%s', with CC '%s'", strings.Join(email.Recipients, ", "), s.sender, strings.Join(email.Cc, ", "))
+	s.logger.Infof("Sending to recipient '%s', with CC '%s'", strings.Join(email.Recipients, ", "), strings.Join(email.Cc, ", "))
 
-	input, err := CreateSendEmailInput(s.sender, email)
+	input, err := s.CreateSendEmailInput(email)
 	if err != nil {
 		s.logger.Errorw("Error while creating email input", "error", err, "recipients", email.Recipients, "cc", email.Cc)
 		return err
 	}
-	res, err := s.svc.SendEmailWithContext(ctx, input)
+	res, err := s.svc.SendRawEmailWithContext(ctx, input)
 	if err != nil {
 		code := UnknownErrorCode
 		if awsError, ok := err.(awserr.Error); ok {
@@ -90,7 +93,7 @@ func FormatSender(name, address string) string {
 	return fmt.Sprintf("%s <%s>", name, address)
 }
 
-func CreateSendEmailInput(sender string, email *Email) (*ses.SendEmailInput, error) {
+func (s *SESMailer) CreateSendEmailInput(email *Email) (*ses.SendRawEmailInput, error) {
 	toAddresses, err := addresses(email.Recipients)
 	if err != nil {
 		return nil, err
@@ -99,35 +102,59 @@ func CreateSendEmailInput(sender string, email *Email) (*ses.SendEmailInput, err
 	if err != nil {
 		return nil, err
 	}
-	return &ses.SendEmailInput{
-		Destination: &ses.Destination{
-			ToAddresses: toAddresses,
-			CcAddresses: ccAddresses,
-		},
-		Message: &ses.Message{
-			Body: &ses.Body{
-				Html: &ses.Content{
-					Charset: aws.String(DefaultCharset),
-					Data:    aws.String(email.Body),
-				},
-			},
-			Subject: &ses.Content{
-				Charset: aws.String(DefaultCharset),
-				Data:    aws.String(email.Subject),
-			},
-		},
-		Source: aws.String(sender),
+
+	msg := gomail.NewMessage()
+
+	var recipients []*string
+	for _, r := range toAddresses {
+		recipients = append(recipients, &r)
+	}
+	for _, r := range ccAddresses {
+		recipients = append(recipients, &r)
+	}
+
+	msg.SetHeader("To", email.Recipients...)
+	msg.SetAddressHeader("From", s.cfg.SenderAddress, s.cfg.SenderName)
+	msg.SetHeader("Subject", email.Subject)
+	msg.SetBody("text/html", email.Body)
+	if len(email.Cc) > 0 {
+		msg.SetHeader("cc", ccAddresses...)
+	}
+
+	for _, attachment := range email.Attachments {
+
+		msg.Attach(attachment.Filename, gomail.SetCopyFunc(func(writer io.Writer) error {
+			reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(attachment.Data))
+			_, err := io.Copy(writer, reader)
+			return err
+		}), gomail.SetHeader(map[string][]string{
+			"content-type": {attachment.ContentType},
+		}))
+	}
+
+	// create a new buffer to add raw data
+	var emailRaw bytes.Buffer
+	if _, err = msg.WriteTo(&emailRaw); err != nil {
+		return nil, err
+	}
+
+	message := ses.RawMessage{Data: emailRaw.Bytes()}
+
+	return &ses.SendRawEmailInput{
+		Source:       &s.cfg.SenderAddress,
+		Destinations: recipients,
+		RawMessage:   &message,
 	}, nil
 }
 
-func addresses(emails []string) ([]*string, error) {
-	addr := make([]*string, 0, len(emails))
+func addresses(emails []string) ([]string, error) {
+	addr := make([]string, 0, len(emails))
 	for _, recipient := range emails {
 		escapedRecipient, err := idna.ToASCII(recipient)
 		if err != nil {
 			return nil, fmt.Errorf("unable to Punycode email: %w", err)
 		}
-		addr = append(addr, aws.String(escapedRecipient))
+		addr = append(addr, escapedRecipient)
 	}
 	return addr, nil
 }

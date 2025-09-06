@@ -53,9 +53,17 @@ func (e *EmailEventHandler) HandleSendEmailTemplate(payload events.SendEmailTemp
 	}
 
 	email := &mailer.Email{
-		Recipients: []string{payload.Recipient},
-		Subject:    rendered.Subject,
-		Body:       rendered.Body,
+		Recipients:  []string{payload.Recipient},
+		Subject:     rendered.Subject,
+		Body:        rendered.Body,
+		Attachments: make([]mailer.Attachment, len(payload.Attachments)),
+	}
+	for i, attachment := range payload.Attachments {
+		email.Attachments[i] = mailer.Attachment{
+			ContentType: attachment.ContentType,
+			Data:        attachment.Data,
+			Filename:    attachment.Filename,
+		}
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), timeout)

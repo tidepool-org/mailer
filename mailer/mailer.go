@@ -21,10 +21,17 @@ func (b *Backend) Decode(value string) error {
 }
 
 type Email struct {
-	Recipients []string `json:"recipients" validate:"min=1,email"`
-	Cc         []string `json:"cc" validate:"email"`
-	Subject    string   `json:"subject" validate:"required"`
-	Body       string   `json:"body" validate:"required"`
+	Recipients  []string     `json:"recipients" validate:"min=1,email"`
+	Cc          []string     `json:"cc" validate:"email"`
+	Subject     string       `json:"subject" validate:"required"`
+	Body        string       `json:"body" validate:"required"`
+	Attachments []Attachment `json:"attachments"`
+}
+
+type Attachment struct {
+	ContentType string `json:"content_type" validate:"required"`
+	Data        string `json:"content" validate:"required"`
+	Filename    string `json:"filename" validate:"required"`
 }
 
 type Mailer interface {
@@ -44,7 +51,7 @@ func New(id Backend, logger *zap.SugaredLogger, validate *validator.Validate) (M
 		}
 
 		params := &SESMailerParams{
-			Cfg: backendConfig,
+			Cfg:    backendConfig,
 			Logger: logger,
 		}
 		return NewSESMailer(params)
