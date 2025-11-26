@@ -1,0 +1,1 @@
+{{ .ClinicName }} Follow Up - Reminder to Connect your twiist Account

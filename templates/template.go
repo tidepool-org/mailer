@@ -6,6 +6,7 @@ import (
 	"fmt"
 	htmlTemplate "html/template"
 	"strconv"
+	"strings"
 	textTemplate "text/template"
 )
 
@@ -48,12 +49,18 @@ func NewPrecompiledTemplate(name TemplateName, subjectTemplate string, bodyTempl
 		return nil, errors.New("models: body template is missing")
 	}
 
-	precompiledSubject, err := textTemplate.New(name.String()).Parse(subjectTemplate)
+	precompiledSubject, err := textTemplate.New(name.String()).Funcs(textTemplate.FuncMap{
+		"toLower": strings.ToLower,
+		"toTitle": strings.Title,
+	}).Parse(subjectTemplate)
 	if err != nil {
 		return nil, fmt.Errorf("models: failure to precompile subject template: %s", err)
 	}
 
-	precompiledBody, err := htmlTemplate.New(name.String()).Parse(bodyTemplate)
+	precompiledBody, err := htmlTemplate.New(name.String()).Funcs(htmlTemplate.FuncMap{
+		"toLower": strings.ToLower,
+		"toTitle": strings.Title,
+	}).Parse(bodyTemplate)
 	if err != nil {
 		return nil, fmt.Errorf("models: failure to precompile body template: %s", err)
 	}
