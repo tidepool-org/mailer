@@ -34,7 +34,7 @@
                   {{if .FullName}}Hi {{ .FullName }}!{{else}}Hi!{{end}}
                 </p>
                 <p class="h2 content-width">
-                  We noticed that your Tidepool connection to LibreView is no longer active. Please reconnect your FreeStyle Libre so you can keep seeing your health information in Tidepool.
+                  We noticed that your Libre account has stopped sharing data with Tidepool. Please reconnect Libre so you can keep seeing your health information in Tidepool.
                 </p>
                 <p class="inner centered">
                   <!--[if (gte mso 9)|(IE)]>
@@ -43,7 +43,7 @@
                     <td>
                   <![endif]-->
                   <a class="btn primary" href="{{ .WebURL }}/v1/oauth/abbott/authorize?restricted_token={{ .RestrictedTokenId }}">
-                    Reconnect your FreeStyle Libre
+                    Reconnect your Libre Account
                   </a>
                   <!--[if (gte mso 9)|(IE)]>
                     </td>
