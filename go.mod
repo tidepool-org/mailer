@@ -1,6 +1,6 @@
 module github.com/tidepool-org/mailer
 
-go 1.24.1
+go 1.25.7
 
 require (
 	github.com/aws/aws-sdk-go v1.55.7
