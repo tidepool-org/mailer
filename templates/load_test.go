@@ -22,6 +22,7 @@ func Test_Load_ExpectedTemplates(t *testing.T) {
 		"informed_consent_granted":                           {},
 		"informed_consent_granted_big_data_donation_project": {},
 		"patient_upload_reminder":                            {},
+		"patient_stale_data_follow_up":                       {},
 		"prescription_access_code":                           {},
 		"share_invitation_received":                          {},
 		"device_issue_abbott_personal":                       {},
